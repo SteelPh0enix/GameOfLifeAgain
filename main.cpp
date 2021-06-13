@@ -49,12 +49,6 @@ void log_program_arguments(Argparser const& args) {
   spdlog::debug("Program arguments: {}", args);
 }
 
-void draw_gol_board(CellField const& cells) {
-
-
-
-}
-
 void draw_gui() {
   ImGui::Begin("Settings and informations");
   ImGui::Text("Hello there!");
@@ -81,7 +75,7 @@ int main(int argc, char** argv) {
   cell.setBorderThickness(2);
 
   auto game = GameOfLife();
-  game.setCellFieldSize(100, 100);
+  game.setCellFieldSize(200, 200);
   game.restart();
   game.populateField([](unsigned x, unsigned y) -> CellState {
     return GetRandomValue(1, 100) < 70 ? CellState::DEAD : CellState::ALIVE;
@@ -92,12 +86,27 @@ int main(int argc, char** argv) {
   board.setCellField(&game.cellField());
   board.setCellSpacing(1);
 
+  auto camera = Camera2D{};
+  camera.target = {
+      static_cast<float>(board.getWidth()) / 2.f,
+      static_cast<float>(board.getHeight()) / 2.f
+  };
+  camera.offset = {
+      static_cast<float>(DEFAULT_SCREEN_WIDTH) / 2.f,
+      static_cast<float>(DEFAULT_SCREEN_HEIGHT) / 2.f
+  };
+  camera.rotation = 0.f;
+  camera.zoom = 1.f;
 
   while (!WindowShouldClose()) {
+    // Drawing
     BeginDrawing();
 
     ClearBackground(GRAY);
+
+    BeginMode2D(camera);
     board.draw();
+    EndMode2D();
 
 //    BeginRLImGui();
 //    draw_gui();
@@ -105,7 +114,29 @@ int main(int argc, char** argv) {
 
     EndDrawing();
 
+    // Logic
     game.step();
+
+    if (IsKeyDown(KEY_D)) {
+      camera.target.x += static_cast<float>(cell.getWidth());
+    } else if (IsKeyDown(KEY_A)) {
+      camera.target.x -= static_cast<float>(cell.getWidth());
+    }
+
+    if (IsKeyDown(KEY_W)) {
+      camera.target.y -= static_cast<float>(cell.getHeight());
+    } else if (IsKeyDown(KEY_S)) {
+      camera.target.y += static_cast<float>(cell.getHeight());
+    }
+
+    camera.zoom += static_cast<float>(GetMouseWheelMove() * 0.05f);
+
+    if (camera.zoom > 5.0f) { camera.zoom = 5.0f; }
+    if (camera.zoom < 0.001f) { camera.zoom = 0.001f; }
+
+    if (IsKeyPressed(KEY_R)) {
+      camera.zoom = 1.f;
+    }
   }
 
   ShutdownRLImGui();
