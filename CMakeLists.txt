@@ -34,9 +34,12 @@ add_definitions(-DSPDLOG_COMPILED_LIB)
 include_directories(${RAYLIB_DIR}/include ${IMGUI_DIR} ${SPDLOG_DIR}/include)
 link_directories(${RAYLIB_DIR}/lib)
 
-set(PROJECT_SOURCES main.cpp rlImGui/rlImGui.cpp utils/argparser.cpp logic/cell_field.cpp logic/game_of_life.cpp graphics/cell_board.cpp graphics/cell.cpp)
+set(PROJECT_SOURCES main.cpp rlImGui/rlImGui.cpp utils/argparser.cpp logic/cell_field.cpp logic/game_of_life.cpp graphics/cell_board.cpp graphics/cell.cpp logic/controls.cpp logic/controls.hpp logic/gui.cpp logic/gui.hpp)
 
 add_executable (${PROJECT_NAME} ${IMGUI_SOURCES} ${SPDLOG_SOURCES} ${PROJECT_SOURCES})
 
-# Winmm and Imm32 is necessary under Windows. I haven't tested it under Linux, MacOS, or other platforms - feel free to make pull requests with properly modified CMakeLists for any platform you want.
-target_link_libraries(${PROJECT_NAME} raylib Winmm Imm32)
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} raylib Winmm Imm32)
+else()
+    target_link_libraries(${PROJECT_NAME} raylib)
+endif()

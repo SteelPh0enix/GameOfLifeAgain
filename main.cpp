@@ -56,7 +56,6 @@ void draw_gui() {
 }
 
 int main(int argc, char** argv) {
-  using namespace std::chrono_literals;
   auto const arguments = Argparser(argc, argv);
 
   setup_logging(arguments.exists("--debug-log-enabled"));
